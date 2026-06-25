@@ -5,7 +5,7 @@ Each persona maps a dominant behavioural driver to a celebratory
 "Money Spirit" identity. Spending categories feed the engine (engine.py),
 which scores drivers and resolves a single persona for the reveal.
 
-Brand anchor: CommBank yellow (#FFCC00) + black, with a per-persona
+Brand anchor: Bankwest orange (#FF961F) + black, with a per-persona
 accent gradient for the story cards.
 """
 

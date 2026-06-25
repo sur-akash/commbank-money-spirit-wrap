@@ -1,33 +1,33 @@
 """
-Phone-framed Money Spirit Wrap story renderer.
+Phone-framed Money Spirit story renderer.
 
 Renders the full 9-screen, Spotify-Wrapped-style experience for a single
 customer as a self-contained HTML document, presented inside a realistic
-phone mockup styled like the **CommBank retail app** (consistent with the
-CommBiz "Business Spirit Wrap" layout):
+phone mockup styled like the **Bankwest retail app**:
 
-  - white device "stage", iOS status bar, app header with the CommBank logo
+  - light device screen, iOS status bar, app header with the circular Bankwest logo
   - story progress segments + tap-to-advance + explicit Back / Next controls
-  - a retail-app bottom tab bar (Home · Pay · Wrap · Cards · More)
-  - premium dark story cards: behaviour-based mascots, percentile badge,
+  - a retail-app bottom tab bar (Home · Pay · Wrap · Cards · More) with a
+    green active accent, echoing the Bankwest mobile app
+  - premium light story cards: behaviour-based mascots, percentile badge,
     peak timeline, a celebratory confetti reveal, and the social share card
 
 Used by both the Streamlit app (components.html) and the static exporter
 (generate.py), so the two stay perfectly in sync.
 """
-from branding import logo_img
+from branding import FONT_LINK, logo_img
 from share_card import render_share_card
 
-# CommBank palette
-Y = "#FFCC00"
-INK = "#141414"
+# Bankwest palette (light theme — black accent + green app-icon accent)
+GREEN = "#43B02A"      # Bankwest app green (icon accents)
+INK = "#26262B"        # charcoal text/headlines
 CARD = "#FFFFFF"
-LINE = "#E7E7EA"
+LINE = "#ECECEF"
 MUTED = "#6B6B70"
 
 
-# One consistent dark CommBank background across every story card.
-DARK_BG = "linear-gradient(170deg, #202020 0%, #141414 46%, #0b0b0b 100%)"
+# One consistent, completely white Bankwest background across every story card.
+LIGHT_BG = "#FFFFFF"
 
 
 DRIVER_ICON = {
@@ -37,7 +37,7 @@ DRIVER_ICON = {
 
 
 def _status_bar():
-    c = "#FFFFFF"
+    c = INK
     return f"""<div class="status">
       <span class="time">9:41</span>
       <span class="sicons">
@@ -60,8 +60,8 @@ def _tabbar():
     out = []
     for i, (label, path) in enumerate(tabs):
         on = i == active
-        col = INK if on else MUTED
-        fill = Y if on else "none"
+        col = GREEN if on else MUTED
+        fill = GREEN if on else "none"
         out.append(
             f"<div class='tab {'active' if on else ''}'>"
             f"<svg width='22' height='22' viewBox='0 0 24 24' fill='{fill}' stroke='{col}' "
@@ -86,7 +86,7 @@ def _timeline_html(timeline, peak_month):
 
 def _cards(wrap):
     p = wrap["persona"]
-    g = DARK_BG
+    g = LIGHT_BG
     year = wrap["year"]
     name = wrap.get("customer_name", "there")
     traits = "".join(f"<span class='chip gold'>{t}</span>" for t in p["traits"])
@@ -97,7 +97,7 @@ def _cards(wrap):
     # 0 — Welcome
     cards.append(f"""
     <section class="card" data-dur="8" data-fx="particles">
-      <div class="card-bg" style="background:linear-gradient(165deg,#101010,#1c1c1c 48%,#2a2a2a)"></div>
+      <div class="card-bg" style="background:#FFFFFF"></div>
       <canvas class="fx-particles"></canvas>
       <div class="card-inner">
         <div class="spacer"></div>
@@ -117,7 +117,7 @@ def _cards(wrap):
       <div class="card-inner">
         <span class="kicker reveal-up d1">Your driver</span>
         <div class="spacer"></div>
-        <div class="glyph float reveal-up d2">{DRIVER_ICON.get(wrap['driver'], '✨')}</div>
+        <div class="glyph-badge float reveal-up d2">{DRIVER_ICON.get(wrap['driver'], '✨')}</div>
         <h2 class="reveal-up d3">{wrap['driver_label']} shaped your year</h2>
         <p class="lead reveal-up d4">{wrap['driver_copy']}</p>
         <div class="spacer"></div>
@@ -161,7 +161,7 @@ def _cards(wrap):
       <div class="card-inner">
         <span class="kicker reveal-up d1">Rewarding you</span>
         <div class="spacer"></div>
-        <div class="glyph reveal-up d2">🌱</div>
+        <div class="glyph-badge reveal-up d2">🌱</div>
         <h2 class="reveal-up d3">A year that paid you back</h2>
         <p class="lead reveal-up d4">{wrap['rewarding_copy']}</p>
         <div class="spacer"></div>
@@ -175,7 +175,7 @@ def _cards(wrap):
       <div class="card-inner">
         <span class="kicker reveal-up d1">Community impact</span>
         <div class="spacer"></div>
-        <div class="glyph reveal-up d2">🤝</div>
+        <div class="glyph-badge reveal-up d2">🤝</div>
         <h2 class="reveal-up d3">Bigger than your balance</h2>
         <p class="lead reveal-up d4">{wrap['community_copy']}</p>
         <div class="spacer"></div>
@@ -231,7 +231,7 @@ def _cards(wrap):
           <div class="act reveal-up d3"><span class="actnum">2</span><p>{p['actions'][1]}</p></div>
           <div class="act reveal-up d4"><span class="actnum">3</span><p>{p['actions'][2]}</p></div>
         </div>
-        <p class="sub reveal-up d4" style="margin-top:14px;text-align:center;font-size:13px">Made with care by CommBank 💛</p>
+        <p class="sub reveal-up d4" style="margin-top:14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:7px">Made with care by Bankwest {logo_img(16)}</p>
         <div class="spacer"></div>
         <button class="cta ghost reveal-up d4" data-restart>Replay my story</button>
       </div>
@@ -243,43 +243,47 @@ def _cards(wrap):
 # --- static CSS (no f-string: keeps CSS braces literal) -------------------
 _CSS = """
 <style>
-  :root { --cba-yellow:#FFCC00; --ink:#141414; }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+  :root { --bw-orange:#1b1b1f; --bw-green:#43B02A; --ink:#26262B; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; }
   html, body { height:100%; }
-  body { background:transparent; color:#fff; display:flex; align-items:flex-start; justify-content:center;
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
+  body { background:transparent; color:var(--ink); display:flex; align-items:flex-start; justify-content:center;
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
 
   .stage { display:flex; justify-content:center; align-items:flex-start;
-    background:#FFFFFF; max-width:460px; margin:0 auto; padding:22px 16px 26px;
-    border-radius:30px; box-shadow:0 24px 70px rgba(0,0,0,.5); width:100%; }
+    background:transparent; max-width:460px; margin:0 auto; padding:22px 16px 26px;
+    width:100%; }
   .fit { display:contents; }
 
-  .phone { position:relative; width:390px; height:824px; background:#0B0B0B;
-    border-radius:52px; border:12px solid #0c0c0c; overflow:hidden;
-    box-shadow:0 18px 44px rgba(0,0,0,.45), inset 0 0 0 2px #2a2a2a;
+  /* iPhone 17 — uniform thin bezel, big corner radius, Dynamic Island */
+  .phone { position:relative; width:390px; height:838px; background:#FFFFFF;
+    border-radius:60px; border:11px solid #1b1b1f; overflow:hidden;
+    box-shadow:0 24px 60px rgba(40,40,50,.30), inset 0 0 0 2px #34343a;
     display:flex; flex-direction:column; }
-  .notch { position:absolute; top:0; left:50%; transform:translateX(-50%);
-    width:148px; height:28px; background:#0c0c0c; border-radius:0 0 18px 18px; z-index:50; }
+  .notch { position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    width:108px; height:30px; background:#000; border-radius:999px; z-index:50;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04); }
+  .homebar { position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+    width:128px; height:5px; border-radius:3px; background:#1b1b1f; opacity:.85; z-index:45; }
 
   /* top app chrome */
-  .topchrome { background:#0B0B0B; z-index:30; }
+  .topchrome { background:#FFFFFF; z-index:30; border-bottom:1px solid #F1E9DC; }
   .status { display:flex; justify-content:space-between; align-items:center;
-    padding:13px 26px 3px; color:#fff; font-size:14px; font-weight:600; }
+    padding:13px 26px 3px; color:var(--ink); font-size:14px; font-weight:600; }
   .status .sicons { display:flex; gap:6px; align-items:center; }
   .appbar { display:flex; align-items:center; justify-content:space-between; padding:6px 18px 8px; }
-  .appbar .brand { display:flex; align-items:center; gap:8px; color:#fff; font-weight:700; font-size:15px; }
-  .appbar .brand img { border-radius:5px; }
-  .appbar .close { color:#fff; opacity:.7; font-size:15px; }
+  .appbar .brand { display:flex; align-items:center; gap:8px; color:var(--ink); font-weight:700; font-size:15px; }
+  .appbar .close { color:var(--ink); opacity:.45; font-size:15px; }
   .segs { display:flex; gap:4px; padding:0 16px 9px; }
-  .seg { flex:1; height:3px; border-radius:3px; background:rgba(255,255,255,.26); overflow:hidden; }
-  .seg > i { display:block; height:100%; width:0; background:#fff; border-radius:3px; }
+  .seg { flex:1; height:3px; border-radius:3px; background:rgba(38,38,43,.14); overflow:hidden; }
+  .seg > i { display:block; height:100%; width:0; background:var(--bw-orange); border-radius:3px; }
   .seg.done > i { width:100%; }
   .seg.active > i { animation:fill var(--dur,7s) linear forwards; }
   .seg.paused > i { animation-play-state:paused; }
   @keyframes fill { from {width:0} to {width:100%} }
 
   /* story viewport */
-  .viewport { position:relative; flex:1; overflow:hidden; background:#000; }
+  .viewport { position:relative; flex:1; overflow:hidden; background:#FFFFFF; }
   .tapzone { position:absolute; top:0; bottom:0; width:34%; z-index:20; cursor:pointer; }
   .tapzone.left { left:0; } .tapzone.right { right:0; width:66%; }
 
@@ -287,19 +291,18 @@ _CSS = """
     opacity:0; pointer-events:none; transform:scale(1.03);
     transition:opacity .5s ease, transform .5s ease; }
   .card.active { opacity:1; pointer-events:auto; transform:scale(1); }
-  .card-bg { position:absolute; inset:0; z-index:0; }
-  .card-bg::after { content:""; position:absolute; inset:0;
-    background:radial-gradient(120% 75% at 50% -8%, rgba(255,204,0,.16), transparent 58%); }
+  .card-bg { position:absolute; inset:0; z-index:0; background:#FFFFFF; }
   .card-inner { position:relative; z-index:2; display:flex; flex-direction:column;
-    height:100%; padding:24px 24px 22px; overflow-y:auto; color:#fff; }
+    height:100%; padding:24px 24px 22px; overflow-y:auto; color:var(--ink); }
 
-  h1 { font-size:29px; line-height:1.12; margin-bottom:14px; font-weight:800; letter-spacing:-.4px; color:#fff; }
-  h2 { font-size:24px; line-height:1.18; margin-bottom:12px; font-weight:800; letter-spacing:-.3px; color:#fff; }
-  h3 { color:#fff; }
-  .greeting { color:var(--cba-yellow); font-weight:800; font-size:18px; letter-spacing:.2px; }
-  .lead { font-size:16.5px; line-height:1.5; color:rgba(255,255,255,.94); }
-  .sub { font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.7); }
-  .kicker { font-size:11px; color:var(--cba-yellow); font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+  h1 { font-size:29px; line-height:1.12; margin-bottom:14px; font-weight:800; letter-spacing:-.4px; color:var(--ink); }
+  h2 { font-size:24px; line-height:1.18; margin-bottom:12px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
+  h3 { color:var(--ink); }
+  .greeting { color:var(--bw-orange); font-weight:800; font-size:18px; letter-spacing:.2px; }
+  .lead { font-size:16.5px; line-height:1.5; color:#3A3A41; }
+  .sub { font-size:14.5px; line-height:1.5; color:#6B6B70; }
+  .kicker { font-size:11px; color:var(--bw-orange); font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+  .kicker.green { color:var(--bw-green); }
   .spacer { flex:1 0 auto; min-height:6px; }
   .reveal-up { opacity:0; transform:translateY(16px); }
   .card.active .reveal-up { animation:up .7s cubic-bezier(.2,.7,.2,1) forwards; }
@@ -308,79 +311,95 @@ _CSS = """
   @keyframes up { to { opacity:1; transform:translateY(0); } }
 
   .glyph { font-size:86px; line-height:1; text-align:center; margin-bottom:14px;
-    filter:drop-shadow(0 12px 26px rgba(0,0,0,.45)); }
-  .glyph.float, .mascot.float { animation:floaty 4s ease-in-out infinite; }
+    filter:drop-shadow(0 12px 22px rgba(180,120,30,.22)); }
+  /* Bankwest-app-style icon tile: emoji inside a bordered white circle */
+  .glyph-badge { width:108px; height:108px; border-radius:50%; margin:0 auto 16px;
+    background:#FFFFFF; border:1.5px solid var(--ink); display:flex; align-items:center;
+    justify-content:center; font-size:52px; line-height:1; }
+  .glyph.float, .glyph-badge.float, .mascot.float { animation:floaty 4s ease-in-out infinite; }
   @keyframes floaty { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-9px)} }
 
   /* mascot tiles keep their original rounded-square artwork */
-  .mascot { margin:0 auto; filter:drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
+  .mascot { margin:0 auto; filter:drop-shadow(0 16px 26px rgba(120,90,30,.22)); }
   .mascot svg, .mascot img { width:100%; height:100%; display:block; object-fit:contain; }
   .mascot.lg { width:178px; height:178px; }
   .mascot.xs { width:50px; height:50px; margin:0; filter:none; flex:0 0 auto; border-radius:11px; overflow:hidden; }
 
   .chips { display:flex; flex-wrap:wrap; gap:8px; }
-  .chip { padding:7px 13px; border-radius:999px; font-size:13.5px; font-weight:700;
-    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); }
-  .chip.gold { background:var(--cba-yellow); color:#000; border-color:transparent; }
+  .chip { padding:7px 14px; border-radius:999px; font-size:13.5px; font-weight:700;
+    color:var(--ink); background:#FFFFFF; border:1.5px solid var(--ink); }
+  .chip.gold { background:#FFFFFF; color:var(--ink); border:1.5px solid var(--ink); }
 
   .badge { align-self:center; width:176px; height:176px; border-radius:50%;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:conic-gradient(var(--cba-yellow) calc(var(--p,88)*1%), rgba(255,255,255,.14) 0); position:relative; }
-  .badge::before { content:""; position:absolute; inset:11px; border-radius:50%; background:rgba(0,0,0,.55); }
-  .badge .pct { position:relative; font-size:42px; font-weight:900; letter-spacing:-1px; text-align:center; line-height:1; }
+    background:conic-gradient(var(--bw-orange) calc(var(--p,88)*1%), rgba(38,38,43,.10) 0); position:relative;
+    box-shadow:0 14px 30px rgba(0,0,0,.14); }
+  .badge::before { content:""; position:absolute; inset:11px; border-radius:50%; background:#FFFFFF; box-shadow:inset 0 1px 4px rgba(0,0,0,.05); }
+  .badge .pct { position:relative; font-size:42px; font-weight:900; letter-spacing:-1px; text-align:center; line-height:1; color:var(--ink); }
   .badge .pct small { font-size:19px; font-weight:800; }
-  .badge .lab { position:relative; font-size:11px; color:rgba(255,255,255,.66); text-transform:uppercase; letter-spacing:.12em; margin-top:6px; }
+  .badge .lab { position:relative; font-size:11px; color:#6B6B70; text-transform:uppercase; letter-spacing:.12em; margin-top:6px; }
 
   .timeline { display:flex; align-items:flex-end; gap:6px; height:168px; padding:8px 2px 0; }
   .bar { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
-  .bar > span { display:block; width:100%; border-radius:6px 6px 3px 3px; background:rgba(255,255,255,.22);
+  .bar > span { display:block; width:100%; border-radius:6px 6px 3px 3px; background:rgba(38,38,43,.12);
     transition:height .8s cubic-bezier(.2,.7,.2,1); }
-  .bar.peak > span { background:var(--cba-yellow); box-shadow:0 0 22px rgba(255,204,0,.6); }
-  .bar small { font-size:9px; color:rgba(255,255,255,.66); }
-  .bar.peak small { color:var(--cba-yellow); font-weight:800; }
+  .bar.peak > span { background:var(--bw-orange); box-shadow:0 0 18px rgba(0,0,0,.18); }
+  .bar small { font-size:9px; color:#6B6B70; }
+  .bar.peak small { color:var(--bw-orange); font-weight:800; }
 
-  .reveal-name { font-size:31px; font-weight:900; letter-spacing:-.6px; text-align:center; margin:6px 0 2px; }
-  .reveal-title { text-align:center; color:var(--cba-yellow); font-weight:800; font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
-  .reveal-tag { text-align:center; font-style:italic; font-size:15px; color:rgba(255,255,255,.9); margin-top:10px; }
+  .reveal-name { font-size:31px; font-weight:900; letter-spacing:-.6px; text-align:center; margin:6px 0 2px; color:var(--ink); }
+  .reveal-title { text-align:center; color:var(--bw-orange); font-weight:800; font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
+  .reveal-tag { text-align:center; font-style:italic; font-size:15px; color:#4A4A52; margin-top:10px; }
 
   .planhead { display:flex; gap:12px; align-items:center; }
   .actions { display:flex; flex-direction:column; gap:10px; width:100%; }
-  .act { display:flex; gap:12px; align-items:center; background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,204,0,.22); border-radius:14px; padding:13px 14px; }
-  .act p { font-size:14px; color:#fff; line-height:1.35; font-weight:500; }
-  .actnum { flex:0 0 auto; width:26px; height:26px; border-radius:50%;
-    background:var(--cba-yellow); color:#000; font-weight:800; font-size:14px;
+  /* Bankwest-app-style option panels: white, thin black border only */
+  .act { display:flex; gap:13px; align-items:center; background:#FFFFFF;
+    border:1.5px solid var(--ink); border-radius:18px; padding:14px 15px; }
+  .act p { font-size:14px; color:var(--ink); line-height:1.35; font-weight:600; }
+  .actnum { flex:0 0 auto; width:30px; height:30px; border-radius:50%;
+    background:#1b1b1f; color:#fff; font-weight:800; font-size:14px;
     display:flex; align-items:center; justify-content:center; }
 
-  .cta { appearance:none; border:0; cursor:pointer; width:100%; padding:15px; border-radius:15px;
-    font-size:15.5px; font-weight:800; background:var(--cba-yellow); color:#000;
-    box-shadow:0 10px 26px rgba(255,204,0,.28); }
-  .cta.ghost { background:rgba(255,255,255,.12); color:#fff; box-shadow:none; }
+  .cta { appearance:none; border:0; cursor:pointer; width:100%; padding:15px; border-radius:16px;
+    font-size:15.5px; font-weight:800; background:var(--bw-orange); color:#fff;
+    box-shadow:0 10px 26px rgba(0,0,0,.20); }
+  .cta.ghost { background:#FFFFFF; color:var(--ink); border:1.5px solid var(--ink); box-shadow:none; }
   .cta:active { transform:translateY(1px); }
 
   .fx-particles { position:absolute; inset:0; z-index:1; }
   .fx-confetti { position:absolute; inset:0; z-index:40; pointer-events:none; }
 
-  /* share screen: fit the Instagram card inside the phone */
-  .card.share .card-inner { padding:16px 14px 18px; }
-  .card.share .igc-card { width:288px; padding:20px 18px 18px; }
-  .card.share .igc-head { font-size:23px; }
-  .card.share .igc-orbit { width:194px; height:194px; }
-  .card.share .igc-tile { width:138px; height:138px; }
-  .card.share .igc-cta { padding:12px 16px; font-size:14px; margin-top:16px; }
+  /* share screen: size the Instagram card to fill the space; button stays visible */
+  .card.share .card-inner { padding:10px 14px 12px; justify-content:center; }
+  .card.share .spacer { min-height:8px; }
+  .card.share .kicker { margin-bottom:6px; }
+  .card.share .igc-card { width:288px; padding:16px 22px 18px; border-radius:28px; }
+  .card.share .igc-top img { height:24px; }
+  .card.share .igc-head { font-size:21px; margin:10px 0 4px; }
+  .card.share .igc-orbit { width:188px; height:188px; margin:4px auto; }
+  .card.share .igc-tile { width:132px; height:132px; }
+  .card.share .igc-doodle { width:23px !important; height:23px !important; }
+  .card.share .igc-name { font-size:21px; margin-top:4px; }
+  .card.share .igc-desc { font-size:14px; margin-top:4px; }
+  .card.share .igc-cta { padding:12px 16px; font-size:13.5px; margin-top:14px; }
+  .card.share .igc-foot { display:none; }   /* redundant with CTA in-phone; freed for a bigger icon */
+  .card.share .cta { padding:14px; font-size:15px; margin-top:6px;
+    background:transparent; color:var(--ink); border:1.5px solid var(--ink); box-shadow:none; }
 
-  /* bottom controls + retail tab bar (CommBank app chrome) */
+  /* bottom controls + retail tab bar (Bankwest app chrome) */
   .controls { display:flex; align-items:center; justify-content:space-between;
-    padding:9px 16px; background:#fff; border-top:1px solid #E7E7EA; z-index:30; }
-  .navp { border:1px solid #E7E7EA; background:#fff; color:#141414; border-radius:999px;
+    padding:9px 16px; background:#fff; border-top:1px solid #ECECEF; z-index:30; }
+  .navp { border:1.5px solid var(--ink); background:#fff; color:var(--ink); border-radius:999px;
     padding:8px 16px; font-weight:700; font-size:13.5px; cursor:pointer; }
-  .navp.primary { background:var(--cba-yellow); border-color:var(--cba-yellow); color:#000; }
-  .navp:disabled { opacity:.4; cursor:default; }
+  .navp.primary { background:var(--bw-orange); border-color:var(--bw-orange); color:#fff; }
+  .navp.primary.done { background:var(--bw-green); border-color:var(--bw-green); color:#fff; }
+  .navp:disabled { opacity:.35; cursor:default; }
   .counter { font-size:12px; color:#6B6B70; font-weight:700; letter-spacing:1px; }
   .tabbar { display:flex; justify-content:space-around; padding:8px 8px 20px;
-    background:#fff; border-top:1px solid #E7E7EA; z-index:30; }
+    background:#fff; border-top:1px solid #ECECEF; z-index:30; }
   .tab { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:600; }
-  .tab.active span { color:#141414; }
+  .tab.active span { color:var(--bw-green); }
 </style>
 """
 
@@ -409,7 +428,10 @@ _JS = """
     clearTimeout(timer);
     timer = setTimeout(()=>{ if(idx<N-1) show(idx+1); }, dur*1000);
     counter.textContent = (idx+1)+' / '+N;
-    prevBtn.disabled = idx===0; nextBtn.textContent = idx===N-1 ? 'Done' : 'Next ›';
+    prevBtn.disabled = idx===0;
+    const last = idx===N-1;
+    nextBtn.textContent = last ? 'Done' : 'Next ›';
+    nextBtn.classList.toggle('done', last);
     const fx = cards[idx].dataset.fx;
     if(fx==='particles') initParticles();
     if(fx==='timeline') animateTimeline();
@@ -436,7 +458,7 @@ _JS = """
     timer=setTimeout(()=>{ if(idx<N-1) show(idx+1); }, dur*1000*0.5); });
 
   function shareSpirit(name, tag){
-    const text = 'My CommBank Money Spirit is the '+name+' — "'+tag+'" ✨ #MoneySpiritWrap';
+    const text = 'My Bankwest Money Spirit is the '+name+' — "'+tag+'" ✨ #MoneySpiritWrap';
     if(navigator.share){ navigator.share({title:'My Money Spirit', text}).catch(()=>{}); }
     else { try{ navigator.clipboard.writeText(text); }catch(e){} alert('Copied to share:\\n\\n'+text); }
   }
@@ -453,14 +475,14 @@ _JS = """
     cancelAnimationFrame(window._pf);
     (function loop(){ ctx.clearRect(0,0,cv.width,cv.height);
       pts.forEach(p=>{ p.y-=p.s; if(p.y<-4){p.y=cv.height+4;p.x=Math.random()*cv.width;}
-        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fillStyle='rgba(255,204,0,'+p.o+')'; ctx.fill(); });
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fillStyle='rgba(27,27,31,'+(p.o*0.5)+')'; ctx.fill(); });
       window._pf=requestAnimationFrame(loop); })();
   }
   function fireConfetti(){
     const cv=document.querySelector('.card.active .fx-confetti'); if(!cv) return;
     const ctx=cv.getContext('2d'); const r=cv.getBoundingClientRect();
     cv.width=r.width; cv.height=r.height;
-    const cols=['#FFCC00','#fff','#FFD84D','#F2B800']; const conf=[];
+    const cols=['#1b1b1f','#43B02A','#6B6B70','#26262B']; const conf=[];
     for(let i=0;i<140;i++) conf.push({x:cv.width/2,y:cv.height*0.3,vx:(Math.random()-0.5)*8,
       vy:Math.random()*-9-3,g:0.22+Math.random()*0.12,s:Math.random()*7+3,c:cols[i%4],rot:Math.random()*6,vr:(Math.random()-0.5)*0.4});
     cancelAnimationFrame(window._cf);
@@ -496,7 +518,7 @@ def render_story(wrap, *, full_document=True):
         <div class="topchrome">
           {_status_bar()}
           <div class="appbar">
-            <div class="brand">{brand}<span>Money Spirit Wrap</span></div>
+            <div class="brand">{brand}<span>Money Spirit</span></div>
             <div class="close">✕</div>
           </div>
           <div class="segs" id="progress"></div>
@@ -512,6 +534,7 @@ def render_story(wrap, *, full_document=True):
           <button class="navp primary" id="next">Next ›</button>
         </div>
         {_tabbar()}
+        <div class="homebar"></div>
       </div>
     </div></div>
     {_JS}
@@ -521,6 +544,7 @@ def render_story(wrap, *, full_document=True):
     return f"""<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<meta name="theme-color" content="#000000"/>
-<title>CommBank · Money Spirit Wrap {wrap['year']}</title>
+<meta name="theme-color" content="#FFFFFF"/>
+{FONT_LINK}
+<title>Money Spirit · Bankwest {wrap['year']}</title>
 {_CSS}</head><body>{body}</body></html>"""

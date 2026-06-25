@@ -2,16 +2,16 @@
 Instagram-style social share card for the Money Spirit Wrap.
 
 Renders the highly shareable card described in the product spec, in the
-**CommBank palette only** (black / white / yellow / golden — no other accent
+**Bankwest palette only** (black / white / orange / amber — no other accent
 colours):
 
   - clean white card (reads well in an Instagram feed/story)
   - black "Here's my <year> Money Spirit" headline
-  - the persona mascot inside a soft golden gradient circle, orbited by
-    hand-drawn gold doodle icons that hint at the spending behaviour
+  - the persona mascot inside a soft orange gradient circle, orbited by
+    hand-drawn amber doodle icons that hint at the spending behaviour
   - persona name + a "Big on …" descriptor
-  - a yellow CommBank call-to-action pill + "Check your Money Wrapped" line
-  - CommBank logo, no balances / no transaction values (per guardrails)
+  - an orange Bankwest call-to-action pill + "Check your Money Wrapped" line
+  - Bankwest logo, no balances / no transaction values (per guardrails)
 
 The card is always centred. Returns a self-contained HTML fragment (scoped
 `igc-` classes) usable both as the in-phone Share screen and as a standalone
@@ -19,11 +19,13 @@ downloadable card.
 """
 import math
 
-INK = "#141414"          # black
+from branding import FONT_STACK, GREEN, logo_full_img
+
+INK = "#26262B"          # charcoal
 MUTED = "#6B6B70"        # grey text
-YELLOW = "#FFCC00"       # CBA yellow
-GOLD = "#D9A300"         # golden (doodles / accents)
-GOLD_DK = "#B8860B"      # deep golden
+YELLOW = "#1b1b1f"       # accent (black per brand request)
+GOLD = "#1b1b1f"         # doodles / accents (black)
+GOLD_DK = "#000000"      # deepest accent
 
 # Tiny 24x24 line-icon doodles (stroke-based) scattered around the mascot.
 DOODLE_PATHS = {
@@ -84,23 +86,23 @@ def _doodle_ring(names, color=GOLD):
 def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
     """Return the Instagram-style share card as an HTML fragment.
 
-    `persona` is a persona dict (from personas.PERSONAS). `logo_html` is the
-    embedded CommBank logo (img tag). When `standalone=True` the card includes
-    its own outer padding/background for download/preview use.
+    `persona` is a persona dict (from personas.PERSONAS). The full Bankwest
+    lockup is embedded at the top. When `standalone=True` the card includes
+    its own outer padding/background for download/preview use. (`logo_html`
+    is accepted for backwards-compatibility but ignored.)
     """
     name = persona["name"]
     desc = persona.get("share_descriptor", persona.get("theme", ""))
     art = persona["art"]
     doodles = _doodle_ring(persona.get("doodles", ["sparkle"] * 6))
+    full_logo = logo_full_img(28)
 
     wrapper_open = '<div class="igc-stage">' if standalone else ""
     wrapper_close = "</div>" if standalone else ""
 
     return f"""{wrapper_open}
 <div class="igc-card">
-  <div class="igc-top">
-    <div class="igc-logo">{logo_html}<span>CommBank</span></div>
-  </div>
+  <div class="igc-top">{full_logo}</div>
   <div class="igc-head">Here's my {year}<br/>Money Spirit</div>
 
   <div class="igc-orbit">
@@ -117,29 +119,28 @@ def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
 {wrapper_close}
 <style>
   .igc-stage {{ display:flex; align-items:center; justify-content:center;
-    padding:18px; min-height:100%; background:radial-gradient(700px 500px at 50% 0%, #1a1a1a, #000); }}
+    padding:18px; min-height:100%; background:radial-gradient(700px 500px at 50% 0%, #FFF6EA, #FFE8CC); }}
   .igc-card {{
     width:340px; margin:0 auto; background:#FFFFFF;
-    border-radius:30px; padding:30px 26px 26px; text-align:center;
-    box-shadow:0 24px 60px rgba(0,0,0,.45); position:relative; overflow:hidden;
-    border:1px solid rgba(255,204,0,.35);
-    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    border-radius:30px; padding:26px 26px 26px; text-align:center;
+    box-shadow:0 24px 60px rgba(40,40,50,.28); position:relative; overflow:hidden;
+    border:1px solid rgba(27,27,31,.22);
+    font-family:{FONT_STACK};
   }}
   .igc-card::before {{ content:""; position:absolute; left:0; right:0; top:0; height:6px;
-    background:linear-gradient(90deg,#FFCC00,#E0AC00); }}
+    background:linear-gradient(90deg,#1b1b1f,#3a3a41); }}
   .igc-card::after {{ content:""; position:absolute; inset:0;
-    background:radial-gradient(120% 55% at 50% 118%, rgba(255,204,0,.12), transparent 60%); }}
-  .igc-top {{ display:flex; justify-content:center; position:relative; z-index:2; }}
-  .igc-logo {{ display:flex; align-items:center; gap:7px; color:{INK};
-    font-weight:800; font-size:13px; letter-spacing:.2px; }}
-  .igc-logo img {{ width:20px; height:20px; display:block; border-radius:5px; }}
+    background:radial-gradient(120% 55% at 50% 118%, rgba(27,27,31,.06), transparent 60%); }}
+  .igc-top {{ display:flex; justify-content:center; align-items:center;
+    position:relative; z-index:2; margin-top:2px; }}
+  .igc-top img {{ height:28px; width:auto; display:block; }}
   .igc-head {{ position:relative; z-index:2; color:{INK}; font-weight:800;
-    font-size:27px; line-height:1.12; letter-spacing:-.3px; margin:14px 0 6px; }}
+    font-size:27px; line-height:1.12; letter-spacing:-.3px; margin:16px 0 6px; }}
 
   .igc-orbit {{ position:relative; width:230px; height:230px; margin:6px auto 4px; z-index:2; }}
   .igc-tile {{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     width:158px; height:158px; display:flex; align-items:center; justify-content:center;
-    filter:drop-shadow(0 10px 20px rgba(0,0,0,.28)); }}
+    filter:drop-shadow(0 10px 20px rgba(0,0,0,.16)); }}
   .igc-tile svg, .igc-tile img {{ width:100%; height:100%; object-fit:contain; display:block; }}
   .igc-doodle {{ position:absolute; opacity:.9; }}
 
@@ -148,7 +149,7 @@ def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
   .igc-desc {{ position:relative; z-index:2; color:{MUTED}; font-size:15px; margin-top:5px; }}
 
   .igc-cta {{ position:relative; z-index:2; margin:20px auto 0; max-width:280px;
-    background:{YELLOW}; color:#1a1a1a; font-weight:800; font-size:15px;
-    padding:14px 18px; border-radius:999px; box-shadow:0 8px 20px rgba(255,204,0,.4); }}
+    background:{YELLOW}; color:#fff; font-weight:800; font-size:15px;
+    padding:14px 18px; border-radius:999px; box-shadow:0 8px 20px rgba(0,0,0,.22); }}
   .igc-foot {{ position:relative; z-index:2; color:{MUTED}; font-size:13px; margin-top:12px; }}
 </style>"""

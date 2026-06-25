@@ -1,5 +1,5 @@
 """
-Mock CommBank customer transaction data for the Money Spirit Wrap prototype.
+Mock Bankwest customer transaction data for the Money Spirit prototype.
 
 In production this layer would be replaced by de-identified, aggregated
 behavioural signals from the bank's data platform. Here we synthesise a
