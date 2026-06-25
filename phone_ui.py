@@ -133,8 +133,8 @@ def _cards(wrap):
         <h2 class="reveal-up d2" style="margin-top:8px">{wrap['peak_month']} was your<br/>biggest {wrap['driver_label'].lower()} month</h2>
         <div class="spacer"></div>
         <div class="reveal-up d3">{_timeline_html(wrap['timeline'], wrap['peak_month'])}</div>
+        <p class="sub reveal-up d4" style="margin-top:22px">That's when {wrap['driver_label'].lower()} became a major part of your year.</p>
         <div class="spacer"></div>
-        <p class="sub reveal-up d4">That's when {wrap['driver_label'].lower()} became a major part of your year.</p>
       </div>
     </section>""")
 
@@ -149,8 +149,8 @@ def _cards(wrap):
           <div class="pct">Top<br/>{wrap['shine_band']}<small>%</small></div>
           <div class="lab">of your crowd</div>
         </div>
+        <p class="lead reveal-up d3" style="text-align:center;margin-top:26px">{wrap['shine_copy']}</p>
         <div class="spacer"></div>
-        <p class="lead reveal-up d3" style="text-align:center">{wrap['shine_copy']}</p>
       </div>
     </section>""")
 

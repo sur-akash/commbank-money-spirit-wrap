@@ -111,7 +111,7 @@ def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
   <div class="igc-name">{name}</div>
   <div class="igc-desc">{desc}</div>
 
-  <div class="igc-cta">What's YOUR {year} Money spend?</div>
+  <div class="igc-cta">What's YOUR {year} Money Spirit?</div>
   <div class="igc-foot">Check your Money Wrapped in the app</div>
 </div>
 {wrapper_close}

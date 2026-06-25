@@ -1,24 +1,25 @@
 """
 Crop the supplied mascot illustration grid into 8 rounded-square icon tiles.
 
-Input  : assets/mascots_source.png  (a 4-column x 2-row grid of mascot tiles)
+Input  : assets/mascot.png  (a 4-column x 2-row grid of white, bordered tiles)
 Output : assets/mascots/<driver>.png  (one per persona)
 
-The original artwork already presents each mascot inside a rounded-square tile
-with its own dark or cream background (alternating across the grid). Rather
-than removing those backgrounds, we keep them: each cell is tight-cropped to
-its tile and a rounded-rectangle mask trims the outer white gap/corners, giving
-a clean app-icon-style tile that preserves the illustration exactly.
+The artwork presents each mascot inside a white rounded-square tile with a thin
+border, on a white page. We keep those tiles exactly as drawn: each cell is
+tight-cropped to its tile (via the border), then the four outer corners — the
+white page showing through outside the rounded border — are flood-filled to
+transparency. The white fill and border inside the tile are left untouched, so
+the icon keeps its original look on any background.
 
 Run:  python3 build_mascots.py
-Tune: CORNER_RADIUS if the rounded corners show white or clip the art.
 """
 import os
+from collections import deque
 
 from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "assets", "mascots_source.png")
+SRC = os.path.join(HERE, "assets", "mascot.png")
 OUT_DIR = os.path.join(HERE, "assets", "mascots")
 
 # Grid position (row, col) -> persona driver. Matches the supplied artwork:
@@ -30,56 +31,97 @@ LAYOUT = {
 }
 
 COLS, ROWS = 4, 2
-GRID_MARGIN = 0.015     # trim a sliver off each cell before tile detection
-WHITE = (252, 252, 252, 255)
-WHITE_TOL = 30          # how close to pure white counts as the outer gap
-CORNER_RADIUS = 0.14    # rounded-corner radius as a fraction of the tile side
-SUPERSAMPLE = 4         # mask anti-aliasing quality
+GRID_MARGIN = 0.01      # trim a sliver off each cell before tile detection
+BORDER_LEVEL = 232      # pixels darker than this (any channel) count as foreground
+CORNER_WHITE = 236      # corner-flood clears pixels lighter than this
+
+# White rounded-tile output (consistent app-icon style, with a subtle border)
+TILE = 360              # output tile size (px)
+MASCOT_MARGIN = 0.12    # white margin around the mascot inside the tile
+RADIUS = 0.18           # corner radius as a fraction of the tile size
+TILE_FILL = (255, 255, 255, 255)
+BORDER_COLOR = (214, 214, 217, 255)
+BORDER_W = 4
+SS = 4                  # supersampling for smooth mask/border
 
 
-def _close(a, b, tol):
-    return abs(a[0] - b[0]) <= tol and abs(a[1] - b[1]) <= tol and abs(a[2] - b[2]) <= tol
+def _is_white(c, level):
+    return c[0] >= level and c[1] >= level and c[2] >= level
 
 
 def _tile_bbox(px, w, h):
-    """Bounding box of the non-white region = the rounded tile within the cell."""
+    """Bounding box of the tile (its border is the outermost non-white ring)."""
     minx, miny, maxx, maxy, found = w, h, 0, 0, False
     for y in range(0, h, 2):
         for x in range(0, w, 2):
-            if not _close(px[x, y], WHITE, WHITE_TOL):
+            if not _is_white(px[x, y], BORDER_LEVEL):
                 found = True
                 minx, maxx = min(minx, x), max(maxx, x)
                 miny, maxy = min(miny, y), max(maxy, y)
     if not found:
         return (0, 0, w, h)
-    return (max(0, minx), max(0, miny), min(w, maxx + 1), min(h, maxy + 1))
+    return (max(0, minx - 1), max(0, miny - 1), min(w, maxx + 2), min(h, maxy + 2))
 
 
-def _rounded_square(tile):
-    """Centre the tile on a square canvas and apply a rounded-rect alpha mask."""
-    tw, th = tile.size
-    side = max(tw, th)
-    canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-    canvas.paste(tile, ((side - tw) // 2, (side - th) // 2))
+def _clear_corners(tile):
+    """Flood from the four corners, clearing the white page outside the rounded
+    border to transparency (stops at the border, so the tile fill is kept)."""
+    tile = tile.convert("RGBA")
+    px = tile.load()
+    w, h = tile.size
+    seen = [[False] * w for _ in range(h)]
+    q = deque([(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)])
+    while q:
+        x, y = q.popleft()
+        if not (0 <= x < w and 0 <= y < h) or seen[y][x]:
+            continue
+        seen[y][x] = True
+        c = px[x, y]
+        if c[3] == 0 or _is_white(c, CORNER_WHITE):
+            px[x, y] = (0, 0, 0, 0)
+            q.extend([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)])
+    return tile
 
-    big = side * SUPERSAMPLE
+
+def _white_tile(mascot):
+    """Centre the isolated mascot on a uniform white rounded tile with a thin
+    border — keeping the consistent boxed icon style on any background."""
+    bbox = mascot.getbbox()
+    if bbox:
+        mascot = mascot.crop(bbox)
+    inner = int(TILE * (1 - 2 * MASCOT_MARGIN))
+    scale = min(inner / mascot.width, inner / mascot.height)
+    mascot = mascot.resize(
+        (max(1, int(mascot.width * scale)), max(1, int(mascot.height * scale))),
+        Image.LANCZOS,
+    )
+
+    # rounded-rect alpha mask (supersampled)
+    big = TILE * SS
     mask = Image.new("L", (big, big), 0)
     ImageDraw.Draw(mask).rounded_rectangle(
-        [0, 0, big - 1, big - 1], radius=int(big * CORNER_RADIUS), fill=255
+        [0, 0, big - 1, big - 1], radius=int(big * RADIUS), fill=255
     )
-    mask = mask.resize((side, side), Image.LANCZOS)
+    mask = mask.resize((TILE, TILE), Image.LANCZOS)
 
-    out = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-    out.paste(canvas, (0, 0), mask)
-    return out
+    tile = Image.new("RGBA", (TILE, TILE), TILE_FILL)
+    tile.paste(mascot, ((TILE - mascot.width) // 2, (TILE - mascot.height) // 2), mascot)
+    tile.putalpha(mask)
+
+    # subtle border, drawn just inside the rounded edge
+    bd = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+    off = BORDER_W * SS // 2
+    ImageDraw.Draw(bd).rounded_rectangle(
+        [off, off, big - 1 - off, big - 1 - off],
+        radius=int(big * RADIUS) - off, outline=BORDER_COLOR, width=BORDER_W * SS,
+    )
+    tile.alpha_composite(bd.resize((TILE, TILE), Image.LANCZOS))
+    return tile
 
 
 def main():
     if not os.path.exists(SRC):
-        raise SystemExit(
-            f"Source not found: {SRC}\n"
-            "Save the mascot grid image there first (assets/mascots_source.png)."
-        )
+        raise SystemExit(f"Source not found: {SRC}\nSave the mascot grid there first.")
     os.makedirs(OUT_DIR, exist_ok=True)
     img = Image.open(SRC).convert("RGBA")
     W, H = img.size
@@ -91,7 +133,7 @@ def main():
                          int((col + 1) * cw - mx), int((row + 1) * ch - my)))
         px = cell.load()
         cell = cell.crop(_tile_bbox(px, cell.width, cell.height))
-        out_img = _rounded_square(cell)
+        out_img = _white_tile(_clear_corners(cell))
         out = os.path.join(OUT_DIR, f"{driver}.png")
         out_img.save(out)
         print(f"  ✓ {driver:13s} {out_img.size}  ->  {os.path.relpath(out, HERE)}")
