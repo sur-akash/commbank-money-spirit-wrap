@@ -104,9 +104,7 @@ def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
   <div class="igc-head">Here's my {year}<br/>Money Spirit</div>
 
   <div class="igc-orbit">
-    <div class="igc-circle">
-      <div class="igc-mascot">{art}</div>
-    </div>
+    <div class="igc-tile">{art}</div>
     {doodles}
   </div>
 
@@ -139,16 +137,10 @@ def render_share_card(persona, year=2026, logo_html="", *, standalone=False):
     font-size:27px; line-height:1.12; letter-spacing:-.3px; margin:14px 0 6px; }}
 
   .igc-orbit {{ position:relative; width:230px; height:230px; margin:6px auto 4px; z-index:2; }}
-  .igc-circle {{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:160px; height:160px; border-radius:50%;
-    background:radial-gradient(circle at 50% 36%, #FFF4CC 0%, #FFE07A 52%, #FFCC00 100%);
-    box-shadow:inset 0 0 0 6px rgba(255,255,255,.65), 0 8px 22px rgba(255,204,0,.35);
-    display:flex; align-items:center; justify-content:center; }}
-  .igc-mascot {{ width:132px; height:132px; display:flex; align-items:center; justify-content:center; }}
-  .igc-mascot svg {{ width:100%; height:100%; display:block;
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.18)); }}
-  .igc-mascot img {{ width:100%; height:100%; object-fit:contain;
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.2)); }}
+  .igc-tile {{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:158px; height:158px; display:flex; align-items:center; justify-content:center;
+    filter:drop-shadow(0 10px 20px rgba(0,0,0,.28)); }}
+  .igc-tile svg, .igc-tile img {{ width:100%; height:100%; object-fit:contain; display:block; }}
   .igc-doodle {{ position:absolute; opacity:.9; }}
 
   .igc-name {{ position:relative; z-index:2; color:{INK}; font-weight:900;

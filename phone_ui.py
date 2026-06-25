@@ -118,9 +118,9 @@ def _cards(wrap):
         <span class="kicker reveal-up d1">Your driver</span>
         <div class="spacer"></div>
         <div class="glyph float reveal-up d2">{DRIVER_ICON.get(wrap['driver'], '✨')}</div>
-        <div class="spacer"></div>
         <h2 class="reveal-up d3">{wrap['driver_label']} shaped your year</h2>
         <p class="lead reveal-up d4">{wrap['driver_copy']}</p>
+        <div class="spacer"></div>
       </div>
     </section>""")
 
@@ -162,9 +162,9 @@ def _cards(wrap):
         <span class="kicker reveal-up d1">Rewarding you</span>
         <div class="spacer"></div>
         <div class="glyph reveal-up d2">🌱</div>
-        <div class="spacer"></div>
         <h2 class="reveal-up d3">A year that paid you back</h2>
         <p class="lead reveal-up d4">{wrap['rewarding_copy']}</p>
+        <div class="spacer"></div>
       </div>
     </section>""")
 
@@ -176,9 +176,9 @@ def _cards(wrap):
         <span class="kicker reveal-up d1">Community impact</span>
         <div class="spacer"></div>
         <div class="glyph reveal-up d2">🤝</div>
-        <div class="spacer"></div>
         <h2 class="reveal-up d3">Bigger than your balance</h2>
         <p class="lead reveal-up d4">{wrap['community_copy']}</p>
+        <div class="spacer"></div>
       </div>
     </section>""")
 
@@ -190,7 +190,7 @@ def _cards(wrap):
       <div class="card-inner">
         <span class="kicker reveal-up d1" style="text-align:center">Your {year} Money Spirit is…</span>
         <div class="spacer"></div>
-        <div class="mascot-stage reveal-up d2"><div class="halo"></div><div class="mascot lg float">{p['art']}</div></div>
+        <div class="mascot lg float reveal-up d2">{p['art']}</div>
         <div class="reveal-name reveal-up d3">{p['name']}</div>
         <div class="reveal-title reveal-up d3">{p['title']}</div>
         <div class="chips reveal-up d4" style="justify-content:center;margin-top:12px">{traits}</div>
@@ -307,22 +307,16 @@ _CSS = """
   .card.active .d3 { animation-delay:.44s; } .card.active .d4 { animation-delay:.6s; }
   @keyframes up { to { opacity:1; transform:translateY(0); } }
 
-  .glyph { font-size:104px; line-height:1; text-align:center; filter:drop-shadow(0 14px 30px rgba(0,0,0,.45)); }
+  .glyph { font-size:86px; line-height:1; text-align:center; margin-bottom:14px;
+    filter:drop-shadow(0 12px 26px rgba(0,0,0,.45)); }
   .glyph.float, .mascot.float { animation:floaty 4s ease-in-out infinite; }
-  @keyframes floaty { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-10px)} }
+  @keyframes floaty { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-9px)} }
 
-  .mascot { margin:0 auto; filter:drop-shadow(0 16px 26px rgba(0,0,0,.4)); }
+  /* mascot tiles keep their original rounded-square artwork */
+  .mascot { margin:0 auto; filter:drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
   .mascot svg, .mascot img { width:100%; height:100%; display:block; object-fit:contain; }
-  .mascot.lg { width:172px; height:172px; }
-  .mascot.xs { width:46px; height:46px; margin:0; filter:none; flex:0 0 auto; }
-
-  /* reveal mascot with a soft golden spotlight halo */
-  .mascot-stage { position:relative; width:200px; height:188px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
-  .mascot-stage .mascot.lg { position:relative; z-index:2; margin:0; }
-  .halo { position:absolute; width:188px; height:188px; border-radius:50%; z-index:1;
-    background:radial-gradient(circle, rgba(255,204,0,.34) 0%, rgba(255,204,0,.12) 45%, transparent 70%);
-    animation:halo 3.5s ease-in-out infinite; }
-  @keyframes halo { 0%,100% {transform:scale(1);opacity:.9} 50% {transform:scale(1.08);opacity:1} }
+  .mascot.lg { width:178px; height:178px; }
+  .mascot.xs { width:50px; height:50px; margin:0; filter:none; flex:0 0 auto; border-radius:11px; overflow:hidden; }
 
   .chips { display:flex; flex-wrap:wrap; gap:8px; }
   .chip { padding:7px 13px; border-radius:999px; font-size:13.5px; font-weight:700;
@@ -372,8 +366,7 @@ _CSS = """
   .card.share .igc-card { width:288px; padding:20px 18px 18px; }
   .card.share .igc-head { font-size:23px; }
   .card.share .igc-orbit { width:194px; height:194px; }
-  .card.share .igc-circle { width:140px; height:140px; }
-  .card.share .igc-mascot { width:114px; height:114px; }
+  .card.share .igc-tile { width:138px; height:138px; }
   .card.share .igc-cta { padding:12px 16px; font-size:14px; margin-top:16px; }
 
   /* bottom controls + retail tab bar (CommBank app chrome) */
