@@ -13,38 +13,7 @@ Built with **Streamlit** so it can be deployed and shared with a single URL.
 
 ---
 
-## Run locally
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
-
-Then open http://localhost:8501. Use the **sidebar** to preview any of the 8
-demo customers; the phone plays their full story (tap the right side of the
-phone or use ← / → keys), and the **social share card** renders beside it with
-a download button.
-
-## Deploy (Streamlit Community Cloud)
-
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=sur-akash/commbank-money-spirit-wrap&branch=main&mainModule=app.py)
-
-The app needs **only Streamlit** at runtime — all assets (logo + mascot tiles)
-are committed, so the build is fast and dependency-light.
-
-1. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with
-   GitHub (authorise access to this repo — private repos are supported on the
-   free tier).
-2. **Create app → Deploy a public app from GitHub**, then set:
-   - Repository: `sur-akash/commbank-money-spirit-wrap`
-   - Branch: `main`
-   - Main file path: `app.py`
-3. (Optional) **Advanced settings → Python 3.12.**
-4. **Deploy.** You'll get a public `https://<name>.streamlit.app` URL.
-
-Community Cloud apps are **publicly viewable by default**, so the deployed app
-is shareable even though the repo stays private. No secrets/env vars are
-required.
+**Streamlit Link:** https://commbank-money-spirit-wrap.streamlit.app/
 
 ---
 
